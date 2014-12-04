@@ -1,7 +1,16 @@
+@p = (message) -> console.log(message)
+
 Template.postEdit.created = ->
   Session.set 'postEditErrors', {}
 
 Template.postSubmit.helpers
+  errorMessage: (field) ->
+    Session.get('postEditErrors')[field]
+
+  errorClass: (field) ->
+    if Session.get('postEditErrors')[field] then 'has-error' else ''
+
+Template.postEdit.helpers
   errorMessage: (field) ->
     Session.get('postEditErrors')[field]
 
@@ -18,9 +27,11 @@ Template.postEdit.events
       url: $(e.target).find("[name=url]").val()
       title: $(e.target).find("[name=title]").val()
 
-    errors = validatePost(post)
+    errors = validatePost(postProperties)
 
-    return Session.set('postSubmitErrors', errors) if errors.title or errors.url
+    p "post validated, errors title: #{errors.title} url: #{errors.url}"
+
+    return Session.set('postEditErrors', errors) if errors.title or errors.url
 
     Posts.update currentPostId,
       $set: postProperties
