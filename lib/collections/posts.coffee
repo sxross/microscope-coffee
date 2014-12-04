@@ -6,7 +6,7 @@ Posts.allow
 
 Posts.deny
   update: (userId, post) -> _.without(fieldNames, 'url', 'title').length > 0
-  
+
   update: (userId, post, fieldNames, modifier) ->
     errors = validatePost modifier.$set
     return errors.title or errors.url
@@ -40,6 +40,7 @@ Meteor.methods
       userId: user._id
       author: user.username
       submitted: new Date()
+      commentsCount: 0
     )
     postId = Posts.insert(post)
     {_id: postId}
