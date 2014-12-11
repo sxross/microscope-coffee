@@ -7,6 +7,7 @@ Posts.allow
 Posts.deny
   update: (userId, post) -> _.without(fieldNames, 'url', 'title').length > 0
 
+Posts.deny
   update: (userId, post, fieldNames, modifier) ->
     errors = validatePost modifier.$set
     return errors.title or errors.url
@@ -41,6 +42,26 @@ Meteor.methods
       author: user.username
       submitted: new Date()
       commentsCount: 0
+      upvoters: []
+      votes: 0
     )
     postId = Posts.insert(post)
     {_id: postId}
+
+  upvote: (postId) ->
+    check(@userId, String)
+    check(postId, String)
+
+    affected = Posts.update(
+      _id: postId
+      upvoters:
+        $ne: @userId
+    ,
+      $addToSet:
+        upvoters: @userId
+
+      $inc:
+        votes: 1
+    )
+
+    throw new Meteor.Error('invalid', "You weren't able to upvote that post") unless affected
